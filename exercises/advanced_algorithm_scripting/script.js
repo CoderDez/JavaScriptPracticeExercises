@@ -417,10 +417,137 @@ function palindrome(str) {
   let chars = str.match(/[a-zA-Z\d]/gi).map(c=>c.toLowerCase())
   let revChars = [...chars].reverse()
 
-  return chars.join("") == revChars.join("")
+  return chars.join("") == revChars.join("");
 
 }
 
 console.log(palindrome("eyeE1334"));
 console.log(palindrome("_eye"));
 console.log(palindrome("1 eye for of 1 eye."))
+
+
+function convertToRoman(num) {
+  const lookup = {
+    "M": 1000, "CM": 900, "D": 500,
+    "CD": 400, "C": 100, "XC": 90,
+    "L": 50, "XL": 40, "X": 10,
+    "IX": 9, "V": 5, "IV": 4, "I": 1
+  }
+
+  
+  let conversion = "";
+
+  Object.keys(lookup).forEach(rn => {
+    while(num >= lookup[rn]) {
+      conversion += rn;
+      num -= lookup[rn];
+    }
+  });
+
+  return conversion;
+}
+
+
+console.log(convertToRoman(2));
+
+
+
+function rot13(str) {
+  const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+  const charConverter = (char) => {
+    let ind = ALPHABET.indexOf(char) + 13;
+    ind = ind <= 25 ? ind : ind - 26;
+    return ALPHABET[ind];
+  }
+
+  return str.split("").map(char => {
+    if (ALPHABET.indexOf(char) == -1) {
+      return char;
+    } 
+    else {
+      return charConverter(char);
+    }
+
+  }).join("")
+}
+
+console.log(rot13("SERR CVMMN!"));
+
+
+function telephoneCheck(str) {
+  return /^(1\s{0,1})?(\(\d{3}\)|\d{3})(\s|-)?\d{3}(\s|-)?\d{4}$/.test(str)
+}
+
+console.log(telephoneCheck("5555555555"))
+console.log(telephoneCheck("1 555-555-5555"));
+console.log(telephoneCheck("1 (555) 555-5555"));
+console.log(telephoneCheck("(555)555-5555"));
+console.log(telephoneCheck("1(555)555-5555"))
+console.log(telephoneCheck("1 456 789 4444"));
+
+
+
+
+function checkCashRegister(price, cash, cid) {
+
+  const sumDrawer = (arr) => {
+    return Number(arr.reduce(
+      (acc, seg) => {return acc + seg[1]}, 0
+    ).toFixed(2))
+  }
+
+  let due = Number((cash - price).toFixed(2));
+  let cidTotal = sumDrawer(cid);
+
+
+  if (cidTotal < due) {
+    return {status: "INSUFFICIENT_FUNDS", change: [] }
+  }
+  else if (cidTotal == due) {
+    return {status: "CLOSED", change: cid}
+  }
+  else {
+    cid.reverse();
+    const change = [];
+    const unitLookup = {
+      "PENNY": 0.01, "NICKEL": 0.05, "DIME": 0.1,
+      "QUARTER": 0.25, "ONE": 1, "FIVE": 5,
+      "TEN": 10, "TWENTY": 20, "ONE HUNDRED": 100
+    }
+
+    for (let i=0; i < cid.length; i++) {
+      let given = 0;
+      let [unit, amount] = cid[i];
+
+      let adder = unitLookup[unit];
+      while(due >= adder && amount > 0) {
+        due = Number((due - adder).toFixed(2));
+        amount = Number((amount - adder).toFixed(2));
+        given += adder;
+      }
+
+      if (given > 0) {
+        change.push([unit, given])
+      }
+
+    }
+
+    due = Number((cash - price).toFixed(2));
+
+    if (sumDrawer(change) == due) {
+      return {
+        status: "OPEN", change: change
+      }
+    }
+    else {
+      return {
+        status: "INSUFFICIENT_FUNDS", change: [], 
+      }
+    }
+
+  } 
+}
+
+checkCashRegister(19.5, 20, [["PENNY", 1.01], ["NICKEL", 2.05], ["DIME", 3.1], ["QUARTER", 4.25], ["ONE", 90], ["FIVE", 55], ["TEN", 20], ["TWENTY", 60], ["ONE HUNDRED", 100]])
+checkCashRegister(3.26, 100, [["PENNY", 1.01], ["NICKEL", 2.05], ["DIME", 3.1], ["QUARTER", 4.25], ["ONE", 90], ["FIVE", 55], ["TEN", 20], ["TWENTY", 60], ["ONE HUNDRED", 100]])
